@@ -1,0 +1,21 @@
+.adminSection,
+.ownerSection,
+.managerSection {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.adminSection {
+  background-color: #f0f8ff;
+}
+
+.ownerSection {
+  background-color: #fff0f5;
+}
+
+.managerSection {
+  background-color: #f0fff0;
+}
+

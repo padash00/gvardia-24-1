@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Building {
+  id     Int     @id @default(autoincrement())
+  name   String
+  floors Floor[]
+}
+
+model Floor {
+  id         Int      @id @default(autoincrement())
+  number     Int
+  buildingId Int
+  building   Building @relation(fields: [buildingId], references: [id])
+  rooms      Room[]
+}
+
+model Room {
+  id         Int     @id @default(autoincrement())
+  number     String
+  area       Float
+  isOccupied Boolean @default(false)
+  floorId    Int
+  floor      Floor   @relation(fields: [floorId], references: [id])
+  tenant     Tenant? @relation(fields: [tenantId], references: [id])
+  tenantId   Int?
+}
+
+model Tenant {
+  id      Int    @id @default(autoincrement())
+  name    String
+  type    String
+  details String
+  rooms   Room[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     String
+}
+
+model Contract {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+  amount    Float
+  tenantId  Int
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  amount    Float
+  status    String
+  tenantId  Int
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
