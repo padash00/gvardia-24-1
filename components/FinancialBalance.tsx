@@ -1,29 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface FinancialData {
-  totalIncome: number
-  totalExpenses: number
-  netProfit: number
-  recentTransactions: Transaction[]
+  readonly totalIncome: number
+  readonly totalExpenses: number
+  readonly netProfit: number
+  readonly recentTransactions: readonly Transaction[]
 }
 
 interface Transaction {
-  id: number
-  date: string
-  description: string
-  amount: number
-  type: "income" | "expense"
+  readonly id: number
+  readonly date: string
+  readonly description: string
+  readonly amount: number
+  readonly type: "income" | "expense"
 }
 
 const FinancialBalance = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // В реальном приложении здесь будет запрос к API
     const fetchFinancialData = async () => {
       // Имитация загрузки данных
       const mockData: FinancialData = {
@@ -39,13 +39,34 @@ const FinancialBalance = () => {
         ],
       }
       setFinancialData(mockData)
+      setLoading(false)
     }
 
     fetchFinancialData()
   }, [])
 
-  if (!financialData) {
-    return <div>Загрузка...</div>
+  const formattedData = useMemo(() => {
+    if (!financialData) return null
+
+    return {
+      ...financialData,
+      recentTransactions: financialData.recentTransactions.map((transaction) => ({
+        ...transaction,
+        formattedDate: new Intl.DateTimeFormat("ru-RU", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }).format(new Date(transaction.date)),
+      })),
+    }
+  }, [financialData])
+
+  if (loading) {
+    return <div className="text-center text-lg font-semibold">Загрузка...</div>
+  }
+
+  if (!formattedData) {
+    return <div className="text-center text-lg font-semibold text-red-500">Ошибка загрузки данных</div>
   }
 
   return (
@@ -58,7 +79,9 @@ const FinancialBalance = () => {
             <CardTitle>Общий доход</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{financialData.totalIncome.toLocaleString()} ₸</p>
+            <p className="text-2xl font-bold text-green-600">
+              {formattedData.totalIncome.toLocaleString()} ₸
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -66,7 +89,9 @@ const FinancialBalance = () => {
             <CardTitle>Общие расходы</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{financialData.totalExpenses.toLocaleString()} ₸</p>
+            <p className="text-2xl font-bold text-red-600">
+              {formattedData.totalExpenses.toLocaleString()} ₸
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -74,7 +99,13 @@ const FinancialBalance = () => {
             <CardTitle>Чистая прибыль</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{financialData.netProfit.toLocaleString()} ₸</p>
+            <p
+              className={`text-2xl font-bold ${
+                formattedData.netProfit >= 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {formattedData.netProfit.toLocaleString()} ₸
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -94,11 +125,13 @@ const FinancialBalance = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {financialData.recentTransactions.map((transaction) => (
+              {formattedData.recentTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
-                  <TableCell>{transaction.date}</TableCell>
+                  <TableCell>{transaction.formattedDate}</TableCell>
                   <TableCell>{transaction.description}</TableCell>
-                  <TableCell>{transaction.amount.toLocaleString()} ₸</TableCell>
+                  <TableCell className={transaction.type === "income" ? "text-green-600" : "text-red-600"}>
+                    {transaction.amount.toLocaleString()} ₸
+                  </TableCell>
                   <TableCell>{transaction.type === "income" ? "Доход" : "Расход"}</TableCell>
                 </TableRow>
               ))}
@@ -111,4 +144,3 @@ const FinancialBalance = () => {
 }
 
 export default FinancialBalance
-
