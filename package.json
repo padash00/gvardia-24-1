@@ -60,8 +60,6 @@
     "zod": "^3.24.1",
     "@auth/core": "latest",
     "nodemailer": "latest",
-    "prisma": "latest",
-    "typescript": "latest",
     "expo": "latest",
     "three": "latest",
     "expo-gl": "latest",
@@ -73,7 +71,6 @@
     "bcryptjs": "latest",
     "jose": "latest",
     "next-auth": "latest",
-    "@prisma/client": "latest",
     "@react-three/drei": "latest"
   },
   "devDependencies": {

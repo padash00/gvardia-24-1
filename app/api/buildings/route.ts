@@ -1,41 +1,23 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { buildings } from "@/utils/mockData"
 
 export async function GET() {
-  try {
-    const buildings = await prisma.building.findMany({
-      include: {
-        floors: {
-          include: {
-            rooms: {
-              include: {
-                tenant: true,
-              },
-            },
-          },
-        },
-      },
-    })
-    return NextResponse.json(buildings)
-  } catch (error) {
-    console.error("Failed to fetch buildings:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch buildings", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    )
-  }
+  return NextResponse.json(buildings)
 }
 
 export async function POST(request: Request) {
   try {
     const { name } = await request.json()
-    if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 })
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json({ error: "Valid name is required" }, { status: 400 })
     }
-    const newBuilding = await prisma.building.create({
-      data: { name },
-    })
-    return NextResponse.json(newBuilding)
+    const newBuilding = {
+      id: Math.max(0, ...buildings.map(b => b.id)) + 1,
+      name,
+      floors: [],
+    }
+    buildings.push(newBuilding)
+    return NextResponse.json(newBuilding, { status: 201 })
   } catch (error) {
     console.error("Failed to create building:", error)
     return NextResponse.json(
