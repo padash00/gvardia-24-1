@@ -100,13 +100,19 @@ export default function OwnerDashboard() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle>Экспорт отчетов</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Экспорт отчетов</Button>
-              </CardContent>
-            </Card>
+  <CardHeader>
+    <CardTitle>Экспорт отчетов</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <Button 
+      className="w-full" 
+      onClick={() => setActiveComponent("exportReports")}
+    >
+      Экспорт отчетов
+    </Button>
+  </CardContent>
+</Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Настройки системы</CardTitle>
