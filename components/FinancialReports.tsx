@@ -41,12 +41,12 @@ const FinancialReports = () => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="income" name="Доходы" stroke="#8884d8" />
-          <Line type="monotone" dataKey="expenses" name="Расходы" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="income" name="Доходы" stroke="#4CAF50" />
+          <Line type="monotone" dataKey="expenses" name="Расходы" stroke="#F44336" />
         </LineChart>
       </ResponsiveContainer>
     ),
-    [],
+    [financialData]
   )
 
   const memoizedExpensesStructureChart = useMemo(
@@ -68,7 +68,7 @@ const FinancialReports = () => {
         </PieChart>
       </ResponsiveContainer>
     ),
-    [],
+    [expenseCategories]
   )
 
   return (
@@ -76,11 +76,11 @@ const FinancialReports = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Финансовая отчетность</h2>
         <div className="flex gap-2">
-          <Button onClick={handleExportPDF} variant="outline">
+          <Button onClick={handleExportPDF} variant="outline" aria-label="Экспорт в PDF">
             <Download className="mr-2 h-4 w-4" />
             Экспорт в PDF
           </Button>
-          <Button onClick={handleExportExcel} variant="outline">
+          <Button onClick={handleExportExcel} variant="outline" aria-label="Экспорт в Excel">
             <Download className="mr-2 h-4 w-4" />
             Экспорт в Excel
           </Button>
@@ -123,27 +123,36 @@ const FinancialReports = () => {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr>
-                  <th className="text-left p-2">Период</th>
-                  <th className="text-right p-2">Доходы</th>
-                  <th className="text-right p-2">Расходы</th>
-                  <th className="text-right p-2">Прибыль</th>
-                  <th className="text-right p-2">Рентабельность</th>
+                <tr className="bg-gray-100">
+                  <th className="text-left p-2 border border-gray-300">Период</th>
+                  <th className="text-right p-2 border border-gray-300">Доходы</th>
+                  <th className="text-right p-2 border border-gray-300">Расходы</th>
+                  <th className="text-right p-2 border border-gray-300">Прибыль</th>
+                  <th className="text-right p-2 border border-gray-300">Рентабельность</th>
                 </tr>
               </thead>
               <tbody>
                 {financialData.map((data) => {
                   const profit = data.income - data.expenses
-                  const profitability = ((profit / data.income) * 100).toFixed(2)
+                  const profitability = data.income > 0 ? ((profit / data.income) * 100).toFixed(2) : "0.00"
+
                   return (
-                    <tr key={data.date}>
-                      <td className="p-2">{data.date}</td>
-                      <td className="text-right p-2">{data.income.toLocaleString()} ₸</td>
-                      <td className="text-right p-2">{data.expenses.toLocaleString()} ₸</td>
-                      <td className="text-right p-2">{profit.toLocaleString()} ₸</td>
-                      <td className="text-right p-2">{profitability}%</td>
+                    <tr key={data.date} className="border-b border-gray-300">
+                      <td className="p-2 border border-gray-300">{data.date}</td>
+                      <td className="text-right p-2 border border-gray-300 text-green-600">
+                        {data.income.toLocaleString()} ₸
+                      </td>
+                      <td className="text-right p-2 border border-gray-300 text-red-600">
+                        {data.expenses.toLocaleString()} ₸
+                      </td>
+                      <td className="text-right p-2 border border-gray-300 font-semibold">
+                        {profit.toLocaleString()} ₸
+                      </td>
+                      <td className="text-right p-2 border border-gray-300">
+                        {profitability}%
+                      </td>
                     </tr>
                   )
                 })}
@@ -157,4 +166,3 @@ const FinancialReports = () => {
 }
 
 export default FinancialReports
-
