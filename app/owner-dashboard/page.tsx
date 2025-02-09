@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import Header from "@/components/Header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,26 +8,10 @@ import UserManagement from "@/components/UserManagement"
 import FinancialBalance from "@/components/FinancialBalance"
 import BuildingManagement from "@/components/BuildingManagement"
 import FinancialReports from "@/components/FinancialReports"
+import ReportExport from "@/components/ReportExport"
 
 export default function OwnerDashboard() {
-  const [username, setUsername] = useState<string | null>(null)
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    const storedUsername = localStorage.getItem("username")
-    const storedRole = localStorage.getItem("role")
-
-    if (!storedUsername || storedRole !== "owner") {
-      router.push("/login")
-    } else {
-      setUsername(storedUsername)
-    }
-  }, [router])
-
-  if (!username) {
-    return null
-  }
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -40,6 +23,8 @@ export default function OwnerDashboard() {
         return <BuildingManagement />
       case "financialReports":
         return <FinancialReports />
+      case "reportExport":
+        return <ReportExport />
       default:
         return null
     }
@@ -100,25 +85,13 @@ export default function OwnerDashboard() {
               </CardContent>
             </Card>
             <Card>
-  <CardHeader>
-    <CardTitle>Экспорт отчетов</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <Button 
-      className="w-full" 
-      onClick={() => setActiveComponent("exportReports")}
-    >
-      Экспорт отчетов
-    </Button>
-  </CardContent>
-</Card>
-
-            <Card>
               <CardHeader>
-                <CardTitle>Настройки системы</CardTitle>
+                <CardTitle>Экспорт отчетов</CardTitle>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Настройки системы</Button>
+                <Button className="w-full" onClick={() => setActiveComponent("reportExport")}>
+                  Экспорт отчетов
+                </Button>
               </CardContent>
             </Card>
           </div>
