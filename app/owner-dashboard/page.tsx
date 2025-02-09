@@ -9,6 +9,11 @@ import FinancialBalance from "@/components/FinancialBalance"
 import BuildingManagement from "@/components/BuildingManagement"
 import FinancialReports from "@/components/FinancialReports"
 import ReportExport from "@/components/ReportExport"
+import NotificationSystem from "@/components/NotificationSystem"
+import EventCalendar from "@/components/EventCalendar"
+import MaintenanceManagement from "@/components/MaintenanceManagement"
+import SpaceEfficiencyAnalysis from "@/components/SpaceEfficiencyAnalysis"
+import DiscountBonusSystem from "@/components/DiscountBonusSystem"
 
 export default function OwnerDashboard() {
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
@@ -25,6 +30,16 @@ export default function OwnerDashboard() {
         return <FinancialReports />
       case "reportExport":
         return <ReportExport />
+      case "notificationSystem":
+        return <NotificationSystem />
+      case "eventCalendar":
+        return <EventCalendar />
+      case "maintenanceManagement":
+        return <MaintenanceManagement />
+      case "spaceEfficiencyAnalysis":
+        return <SpaceEfficiencyAnalysis />
+      case "discountBonusSystem":
+        return <DiscountBonusSystem />
       default:
         return null
     }
@@ -91,6 +106,56 @@ export default function OwnerDashboard() {
               <CardContent>
                 <Button className="w-full" onClick={() => setActiveComponent("reportExport")}>
                   Экспорт отчетов
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Уведомления</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("notificationSystem")}>
+                  Просмотр уведомлений
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Календарь событий</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("eventCalendar")}>
+                  Открыть календарь
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Техническое обслуживание</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("maintenanceManagement")}>
+                  Управление обслуживанием
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Анализ эффективности площадей</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("spaceEfficiencyAnalysis")}>
+                  Просмотр анализа
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Скидки и бонусы</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("discountBonusSystem")}>
+                  Управление скидками
                 </Button>
               </CardContent>
             </Card>
