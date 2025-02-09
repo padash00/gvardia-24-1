@@ -10,47 +10,79 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import BuildingModel3D from "@/components/BuildingModel3D"
 import FloorInfo from "@/components/FloorInfo"
 import { useToast } from "@/components/ui/use-toast"
-import { buildings } from "@/utils/mockData"
+import { buildings as initialBuildings } from "@/utils/mockData"
 
 const BuildingManagement = () => {
-  const [selectedBuilding, setSelectedBuilding] = useState(buildings[0])
-  const [selectedFloor, setSelectedFloor] = useState(selectedBuilding.floors[0])
+  const [buildings, setBuildings] = useState(initialBuildings)
+  const [selectedBuilding, setSelectedBuilding] = useState(initialBuildings[0])
+  const [selectedFloor, setSelectedFloor] = useState(initialBuildings[0]?.floors[0] || null)
   const [newBuilding, setNewBuilding] = useState({ name: "" })
   const [newRoom, setNewRoom] = useState({ number: "", area: 0 })
   const { toast } = useToast()
 
-  const handleAddBuilding = (e: React.FormEvent) => {
-    e.preventDefault()
-    const newBuildingWithId = {
-      ...newBuilding,
-      id: buildings.length + 1,
-      floors: [],
-    }
-    buildings.push(newBuildingWithId)
-    setNewBuilding({ name: "" })
-    toast({
-      title: "Success",
-      description: "Building added successfully.",
-    })
-  }
+  const handleAddBuilding = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!newBuilding.name.trim()) return
 
-  const handleAddRoom = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (selectedFloor) {
-      const newRoomWithId = {
-        ...newRoom,
-        id: selectedFloor.rooms.length + 1,
-        isOccupied: false,
-        tenant: null,
+      const newBuildingWithId = {
+        id: buildings.length + 1,
+        name: newBuilding.name,
+        floors: [{ number: 1, rooms: [] }], // Добавляем первый этаж
       }
-      selectedFloor.rooms.push(newRoomWithId)
-      setNewRoom({ number: "", area: 0 })
+
+      setBuildings((prev) => [...prev, newBuildingWithId])
+      setSelectedBuilding(newBuildingWithId)
+      setSelectedFloor(newBuildingWithId.floors[0])
+      setNewBuilding({ name: "" })
+
       toast({
-        title: "Success",
-        description: "Room added successfully.",
+        title: "Успех",
+        description: "Здание добавлено успешно.",
       })
-    }
-  }
+    },
+    [newBuilding, buildings, toast]
+  )
+
+  const handleAddRoom = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!newRoom.number.trim() || newRoom.area <= 0) return
+
+      if (selectedFloor) {
+        const newRoomWithId = {
+          id: selectedFloor.rooms.length + 1,
+          number: newRoom.number,
+          area: newRoom.area,
+          isOccupied: false,
+          tenant: null,
+        }
+
+        setBuildings((prev) =>
+          prev.map((building) =>
+            building.id === selectedBuilding.id
+              ? {
+                  ...building,
+                  floors: building.floors.map((floor) =>
+                    floor.number === selectedFloor.number
+                      ? { ...floor, rooms: [...floor.rooms, newRoomWithId] }
+                      : floor
+                  ),
+                }
+              : building
+          )
+        )
+
+        setNewRoom({ number: "", area: 0 })
+
+        toast({
+          title: "Успех",
+          description: "Кабинет добавлен успешно.",
+        })
+      }
+    },
+    [newRoom, selectedFloor, selectedBuilding, toast]
+  )
 
   const handleFloorSelect = useCallback((floor: typeof selectedFloor) => {
     setSelectedFloor(floor)
@@ -69,7 +101,7 @@ const BuildingManagement = () => {
         onFloorSelect={handleFloorSelect}
       />
     ),
-    [selectedBuilding, handleFloorSelect],
+    [selectedBuilding, handleFloorSelect]
   )
 
   return (
@@ -90,7 +122,7 @@ const BuildingManagement = () => {
               <Input
                 id="buildingName"
                 value={newBuilding.name}
-                onChange={(e) => setNewBuilding({ ...newBuilding, name: e.target.value })}
+                onChange={(e) => setNewBuilding({ name: e.target.value })}
                 required
               />
             </div>
@@ -187,4 +219,3 @@ const BuildingManagement = () => {
 }
 
 export default BuildingManagement
-
