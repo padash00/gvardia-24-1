@@ -1,113 +1,160 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import React, { useState, useCallback, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useToast } from "@/components/ui/use-toast"
+
 import BuildingModel3D from "@/components/BuildingModel3D"
 import FloorInfo from "@/components/FloorInfo"
-import { useToast } from "@/components/ui/use-toast"
+import AddBuildingForm from "./AddBuildingForm"
+import AddRoomForm from "./AddRoomForm"
+
 import { buildings as initialBuildings } from "@/utils/mockData"
 
-const BuildingManagement = () => {
-  const [buildings, setBuildings] = useState(initialBuildings)
-  const [selectedBuilding, setSelectedBuilding] = useState(initialBuildings[0])
-  const [selectedFloor, setSelectedFloor] = useState(initialBuildings[0]?.floors[0] || null)
-  const [newBuilding, setNewBuilding] = useState({ name: "" })
-  const [newRoom, setNewRoom] = useState({ number: "", area: 0 })
+// Пример интерфейсов (TypeScript)
+interface Room {
+  id: string
+  number: string
+  area: number
+  isOccupied: boolean
+  tenant: string | null
+}
+
+interface Floor {
+  number: number
+  rooms: Room[]
+}
+
+interface Building {
+  id: string
+  name: string
+  floors: Floor[]
+}
+
+const BuildingManagement: React.FC = () => {
   const { toast } = useToast()
 
-  const handleAddBuilding = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!newBuilding.name.trim()) return
+  const [buildings, setBuildings] = useState<Building[]>(initialBuildings)
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(initialBuildings[0] || null)
+  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(
+    initialBuildings[0]?.floors[0] || null
+  )
 
-      const newBuildingWithId = {
-        id: buildings.length + 1,
-        name: newBuilding.name,
-        floors: [{ number: 1, rooms: [] }], // Добавляем первый этаж
+  /**
+   * Обработчик добавления нового здания.
+   * Формирует здание, добавляет в общий список и выделяет его.
+   */
+  const handleAddBuilding = useCallback(
+    (newBuildingName: string) => {
+      if (!newBuildingName.trim()) return
+
+      // Генерируем уникальный идентификатор (например, через uuid или nanoid)
+      const newBuildingId = crypto.randomUUID()
+
+      const newBuilding: Building = {
+        id: newBuildingId,
+        name: newBuildingName,
+        // По умолчанию создаём один пустой этаж
+        floors: [
+          {
+            number: 1,
+            rooms: [],
+          },
+        ],
       }
 
-      setBuildings((prev) => [...prev, newBuildingWithId])
-      setSelectedBuilding(newBuildingWithId)
-      setSelectedFloor(newBuildingWithId.floors[0])
-      setNewBuilding({ name: "" })
+      setBuildings((prev) => [...prev, newBuilding])
+      setSelectedBuilding(newBuilding)
+      setSelectedFloor(newBuilding.floors[0])
 
       toast({
         title: "Успех",
-        description: "Здание добавлено успешно.",
+        description: `Здание "${newBuildingName}" добавлено успешно.`,
       })
     },
-    [newBuilding, buildings, toast]
+    [toast]
   )
 
+  /**
+   * Обработчик добавления нового кабинета.
+   * Добавляет новый кабинет на текущий этаж выделенного здания.
+   */
   const handleAddRoom = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!newRoom.number.trim() || newRoom.area <= 0) return
+    (roomNumber: string, roomArea: number) => {
+      if (!roomNumber.trim() || roomArea <= 0 || !selectedFloor || !selectedBuilding) return
 
-      if (selectedFloor) {
-        const newRoomWithId = {
-          id: selectedFloor.rooms.length + 1,
-          number: newRoom.number,
-          area: newRoom.area,
-          isOccupied: false,
-          tenant: null,
-        }
-
-        setBuildings((prev) =>
-          prev.map((building) =>
-            building.id === selectedBuilding.id
-              ? {
-                  ...building,
-                  floors: building.floors.map((floor) =>
-                    floor.number === selectedFloor.number
-                      ? { ...floor, rooms: [...floor.rooms, newRoomWithId] }
-                      : floor
-                  ),
-                }
-              : building
-          )
-        )
-
-        setNewRoom({ number: "", area: 0 })
-
-        toast({
-          title: "Успех",
-          description: "Кабинет добавлен успешно.",
-        })
+      const newRoom: Room = {
+        id: crypto.randomUUID(),
+        number: roomNumber,
+        area: roomArea,
+        isOccupied: false,
+        tenant: null,
       }
+
+      // Обновляем конкретный этаж конкретного здания
+      setBuildings((prev) =>
+        prev.map((building) => {
+          if (building.id === selectedBuilding.id) {
+            return {
+              ...building,
+              floors: building.floors.map((floor) => {
+                if (floor.number === selectedFloor.number) {
+                  return {
+                    ...floor,
+                    rooms: [...floor.rooms, newRoom],
+                  }
+                }
+                return floor
+              }),
+            }
+          }
+          return building
+        })
+      )
+
+      toast({
+        title: "Успех",
+        description: `Кабинет №${roomNumber} добавлен успешно.`,
+      })
     },
-    [newRoom, selectedFloor, selectedBuilding, toast]
+    [selectedBuilding, selectedFloor, toast]
   )
 
-  const handleFloorSelect = useCallback((floor: typeof selectedFloor) => {
+  /**
+   * Выбор этажа в модели здания.
+   */
+  const handleFloorSelect = useCallback((floorNumber: number) => {
+    if (!selectedBuilding) return
+    const floor = selectedBuilding.floors.find((f) => f.number === floorNumber) || null
     setSelectedFloor(floor)
-  }, [])
+  }, [selectedBuilding])
 
-  const memoizedBuildingModel = useMemo(
-    () => (
-      <BuildingModel3D
-        floors={selectedBuilding.floors.map((floor) => ({
-          floorNumber: floor.number,
-          rooms: floor.rooms.map((room) => ({
-            number: room.number,
-            tenant: room.tenant || null,
-          })),
-        }))}
-        onFloorSelect={handleFloorSelect}
-      />
-    ),
-    [selectedBuilding, handleFloorSelect]
-  )
+  /**
+   * Обёртка для 3D-модели здания, чтобы не пересоздавать компонент слишком часто
+   */
+  const memoizedBuildingModel = useMemo(() => {
+    if (!selectedBuilding) return null
+
+    // Преобразуем структуру для BuildingModel3D
+    const floors = selectedBuilding.floors.map((floor) => ({
+      floorNumber: floor.number,
+      rooms: floor.rooms.map((room) => ({
+        number: room.number,
+        tenant: room.tenant || null,
+      })),
+    }))
+
+    return <BuildingModel3D floors={floors} onFloorSelect={handleFloorSelect} />
+  }, [selectedBuilding, handleFloorSelect])
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Управление зданиями</h2>
+      <h2 className="text-2xl font-bold mb-2">Управление зданиями</h2>
 
+      {/* Кнопка добавления нового здания */}
       <Dialog>
         <DialogTrigger asChild>
           <Button>Добавить здание</Button>
@@ -116,28 +163,23 @@ const BuildingManagement = () => {
           <DialogHeader>
             <DialogTitle>Добавить новое здание</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddBuilding} className="space-y-4">
-            <div>
-              <Label htmlFor="buildingName">Название здания</Label>
-              <Input
-                id="buildingName"
-                value={newBuilding.name}
-                onChange={(e) => setNewBuilding({ name: e.target.value })}
-                required
-              />
-            </div>
-            <Button type="submit">Добавить</Button>
-          </form>
+
+          {/* Форма вынесена в отдельный компонент AddBuildingForm */}
+          <AddBuildingForm onAddBuilding={handleAddBuilding} />
         </DialogContent>
       </Dialog>
 
+      {/* Выбранное здание и этаж */}
       {selectedBuilding && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>{selectedBuilding.name}</CardTitle>
             </CardHeader>
-            <CardContent>{memoizedBuildingModel}</CardContent>
+            <CardContent>
+              {/* 3D-модель здания (этажи) */}
+              {memoizedBuildingModel}
+            </CardContent>
           </Card>
 
           {selectedFloor && (
@@ -152,10 +194,11 @@ const BuildingManagement = () => {
         </div>
       )}
 
-      {selectedFloor && (
+      {/* Информация о текущем этаже и кабинетах */}
+      {selectedBuilding && selectedFloor && (
         <Card>
           <CardHeader>
-            <CardTitle>{selectedFloor.number} этаж</CardTitle>
+            <CardTitle>{`Этаж №${selectedFloor.number}`}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -179,6 +222,7 @@ const BuildingManagement = () => {
               </TableBody>
             </Table>
 
+            {/* Добавление кабинета */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="mt-4">Добавить кабинет</Button>
@@ -187,28 +231,9 @@ const BuildingManagement = () => {
                 <DialogHeader>
                   <DialogTitle>Добавить новый кабинет</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleAddRoom} className="space-y-4">
-                  <div>
-                    <Label htmlFor="roomNumber">Номер кабинета</Label>
-                    <Input
-                      id="roomNumber"
-                      value={newRoom.number}
-                      onChange={(e) => setNewRoom({ ...newRoom, number: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="roomArea">Площадь (м²)</Label>
-                    <Input
-                      id="roomArea"
-                      type="number"
-                      value={newRoom.area}
-                      onChange={(e) => setNewRoom({ ...newRoom, area: Number(e.target.value) })}
-                      required
-                    />
-                  </div>
-                  <Button type="submit">Добавить</Button>
-                </form>
+
+                {/* Форма вынесена в отдельный компонент AddRoomForm */}
+                <AddRoomForm onAddRoom={handleAddRoom} />
               </DialogContent>
             </Dialog>
           </CardContent>
