@@ -16,10 +16,12 @@ export default function AdminDashboard() {
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Проверка авторизации и роли пользователя
   useEffect(() => {
     const storedUsername = localStorage.getItem("username")
     const storedRole = localStorage.getItem("role")
 
+    // Если нет логина или роль не admin, перенаправляем на /login
     if (!storedUsername || storedRole !== "admin") {
       router.push("/login")
     } else {
@@ -29,13 +31,53 @@ export default function AdminDashboard() {
     setIsLoading(false)
   }, [router])
 
+  // Если ещё загружаем данные — показываем индикатор
   if (isLoading) {
     return <p className="text-center mt-10 text-lg">Загрузка...</p>
   }
 
+  // Если пользователя нет, просто ничего не рендерим, поскольку useEffect перенаправит на /login
   if (!username) {
     return null
   }
+
+  // Список опций для админ-панели
+  const adminOptions = [
+    {
+      id: "tenantManagement",
+      title: "Управление арендаторами",
+      onClick: () => setActiveComponent("tenantManagement"),
+    },
+    {
+      id: "contracts",
+      title: "Управление договорами",
+      // При желании подключите динамический импорт или перенаправление
+      onClick: () => console.log("Управление договорами"),
+    },
+    {
+      id: "properties",
+      title: "Управление помещениями",
+      onClick: () => console.log("Управление помещениями"),
+    },
+    {
+      id: "payments",
+      title: "Подтверждение платежей",
+      onClick: () => console.log("Подтверждение платежей"),
+    },
+    {
+      id: "documents",
+      title: "Просмотр документов",
+      onClick: () => console.log("Просмотр документов"),
+    },
+    {
+      id: "rentalAutomation",
+      title: "Автоматизация аренды",
+      onClick: () => setActiveComponent("rentalAutomation"),
+    },
+  ]
+
+  // Функция возврата в главное меню
+  const handleBack = () => setActiveComponent(null)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -45,9 +87,10 @@ export default function AdminDashboard() {
 
         {activeComponent ? (
           <div>
-            <Button onClick={() => setActiveComponent(null)} className="mb-4">
+            <Button onClick={handleBack} className="mb-4">
               Назад
             </Button>
+            {/* Подгружаем нужный компонент асинхронно */}
             <Suspense fallback={<p className="text-center">Загрузка компонента...</p>}>
               {activeComponent === "tenantManagement" && <TenantManagement />}
               {activeComponent === "rentalAutomation" && <RentalAutomation />}
@@ -55,58 +98,18 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Управление арендаторами</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" onClick={() => setActiveComponent("tenantManagement")}>
-                  Управление арендаторами
-                </Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Управление договорами</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Управление договорами</Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Управление помещениями</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Управление помещениями</Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Подтверждение платежей</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Подтверждение платежей</Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Просмотр документов</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full">Просмотр документов</Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Автоматизация аренды</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" onClick={() => setActiveComponent("rentalAutomation")}>
-                  Управление автоматизацией
-                </Button>
-              </CardContent>
-            </Card>
+            {adminOptions.map((option) => (
+              <Card key={option.id}>
+                <CardHeader>
+                  <CardTitle>{option.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full" onClick={option.onClick}>
+                    {option.title}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </main>
