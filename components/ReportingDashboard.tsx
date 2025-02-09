@@ -1,4 +1,7 @@
+"use client"
+
 import type React from "react"
+import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -16,20 +19,34 @@ interface ReportingDashboardProps {
 }
 
 const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
-  const totalRooms = 15 // Обновлено в соответствии с предоставленной информацией
+  const totalRooms = 15
   const occupiedRooms = tenants.length
-  const occupancyRate = (occupiedRooms / totalRooms) * 100
+  const occupancyRate = totalRooms > 0 ? ((occupiedRooms / totalRooms) * 100).toFixed(2) : "0"
 
-  const totalRent = tenants.reduce((sum, tenant) => sum + tenant.rentAmount, 0)
-  const paidRent = tenants
-    .filter((tenant) => tenant.paymentStatus === "Оплачено")
-    .reduce((sum, tenant) => sum + tenant.rentAmount, 0)
+  const totalRent = useMemo(
+    () => tenants.reduce((sum, tenant) => sum + tenant.rentAmount, 0),
+    [tenants]
+  )
 
-  const floorData = [0, 1, 2, 3].map((floor) => ({
-    name: floor === 0 ? "Подвал" : `${floor} этаж`,
-    occupiedRooms: tenants.filter((tenant) => tenant.floor === floor).length,
-    totalRooms: floor === 0 ? 1 : floor === 3 ? 1 : floor === 1 ? 5 : 8, // Обновлено в соответствии с предоставленной информацией
-  }))
+  const paidRent = useMemo(
+    () =>
+      tenants
+        .filter((tenant) => tenant.paymentStatus === "Оплачено")
+        .reduce((sum, tenant) => sum + tenant.rentAmount, 0),
+    [tenants]
+  )
+
+  const paidRentPercentage = totalRent > 0 ? ((paidRent / totalRent) * 100).toFixed(2) : "0"
+
+  const floorData = useMemo(
+    () =>
+      [0, 1, 2, 3].map((floor) => ({
+        name: floor === 0 ? "Подвал" : `${floor} этаж`,
+        occupiedRooms: tenants.filter((tenant) => tenant.floor === floor).length,
+        totalRooms: floor === 0 ? 1 : floor === 3 ? 1 : floor === 1 ? 5 : 8,
+      })),
+    [tenants]
+  )
 
   return (
     <div className="space-y-4">
@@ -40,7 +57,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
             <CardTitle>Занятость помещений</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{occupancyRate.toFixed(2)}%</p>
+            <p className="text-3xl font-bold text-blue-600">{occupancyRate}%</p>
             <p>
               {occupiedRooms} из {totalRooms} помещений заняты
             </p>
@@ -51,7 +68,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
             <CardTitle>Общая арендная плата</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{totalRent.toLocaleString()} ₸</p>
+            <p className="text-3xl font-bold text-green-600">{totalRent.toLocaleString()} ₸</p>
           </CardContent>
         </Card>
         <Card>
@@ -59,8 +76,8 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
             <CardTitle>Собранная арендная плата</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{paidRent.toLocaleString()} ₸</p>
-            <p>{((paidRent / totalRent) * 100).toFixed(2)}% от общей суммы</p>
+            <p className="text-3xl font-bold text-green-700">{paidRent.toLocaleString()} ₸</p>
+            <p>{paidRentPercentage}% от общей суммы</p>
           </CardContent>
         </Card>
       </div>
@@ -76,8 +93,8 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="occupiedRooms" name="Занятые помещения" fill="#8884d8" />
-              <Bar dataKey="totalRooms" name="Всего помещений" fill="#82ca9d" />
+              <Bar dataKey="occupiedRooms" name="Занятые помещения" fill="#4CAF50" />
+              <Bar dataKey="totalRooms" name="Всего помещений" fill="#FF7043" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -87,4 +104,3 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ tenants }) => {
 }
 
 export default ReportingDashboard
-
