@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import ContractCreation from "@/components/ContractCreation"
 import PaymentUpdate from "@/components/PaymentUpdate"
+import NotificationSystem from "@/components/NotificationSystem"
+import EventCalendar from "@/components/EventCalendar"
+import MaintenanceManagement from "@/components/MaintenanceManagement"
+import DiscountBonusSystem from "@/components/DiscountBonusSystem"
 
 export default function ManagerDashboard() {
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
@@ -16,6 +20,14 @@ export default function ManagerDashboard() {
         return <ContractCreation />
       case "paymentUpdate":
         return <PaymentUpdate />
+      case "notificationSystem":
+        return <NotificationSystem />
+      case "eventCalendar":
+        return <EventCalendar />
+      case "maintenanceManagement":
+        return <MaintenanceManagement />
+      case "discountBonusSystem":
+        return <DiscountBonusSystem />
       default:
         return null
     }
@@ -52,6 +64,46 @@ export default function ManagerDashboard() {
               <CardContent>
                 <Button className="w-full" onClick={() => setActiveComponent("paymentUpdate")}>
                   Обновить статус оплаты
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Уведомления</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("notificationSystem")}>
+                  Просмотр уведомлений
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Календарь событий</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("eventCalendar")}>
+                  Открыть календарь
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Техническое обслуживание</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("maintenanceManagement")}>
+                  Управление обслуживанием
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Скидки и бонусы</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("discountBonusSystem")}>
+                  Управление скидками
                 </Button>
               </CardContent>
             </Card>
