@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense, lazy, useMemo } from "react"
+import { useState, useEffect, Suspense, lazy } from "react"
 import { useRouter } from "next/navigation"
 import Header from "@/components/Header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [username, setUsername] = useState<string | null>(null)
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username")
@@ -24,22 +25,17 @@ export default function AdminDashboard() {
     } else {
       setUsername(storedUsername)
     }
+
+    setIsLoading(false)
   }, [router])
 
-  if (!username) {
-    return null // Можно добавить лоадер или редирект
+  if (isLoading) {
+    return <p className="text-center mt-10 text-lg">Загрузка...</p>
   }
 
-  const renderComponent = useMemo(() => {
-    switch (activeComponent) {
-      case "tenantManagement":
-        return <TenantManagement />
-      case "rentalAutomation":
-        return <RentalAutomation />
-      default:
-        return null
-    }
-  }, [activeComponent])
+  if (!username) {
+    return null
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -52,7 +48,10 @@ export default function AdminDashboard() {
             <Button onClick={() => setActiveComponent(null)} className="mb-4">
               Назад
             </Button>
-            <Suspense fallback={<p>Загрузка...</p>}>{renderComponent}</Suspense>
+            <Suspense fallback={<p className="text-center">Загрузка компонента...</p>}>
+              {activeComponent === "tenantManagement" && <TenantManagement />}
+              {activeComponent === "rentalAutomation" && <RentalAutomation />}
+            </Suspense>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
