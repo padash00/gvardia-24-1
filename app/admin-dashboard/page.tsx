@@ -12,6 +12,11 @@ import UserActivityAudit from "@/components/UserActivityAudit"
 import SystemSettings from "@/components/SystemSettings"
 import BackupManagement from "@/components/BackupManagement"
 import SystemPerformanceMonitoring from "@/components/SystemPerformanceMonitoring"
+import AnalyticsAndReporting from "@/components/AnalyticsAndReporting"
+import TaskAndProjectManagement from "@/components/TaskAndProjectManagement"
+import AccessControlSystem from "@/components/AccessControlSystem"
+import UtilityManagement from "@/components/UtilityManagement"
+import TenantRequestSystem from "@/components/TenantRequestSystem"
 
 export default function AdminDashboard() {
   const [username, setUsername] = useState<string | null>(null)
@@ -49,6 +54,16 @@ export default function AdminDashboard() {
         return <BackupManagement />
       case "systemPerformanceMonitoring":
         return <SystemPerformanceMonitoring />
+      case "analyticsAndReporting":
+        return <AnalyticsAndReporting />
+      case "taskAndProjectManagement":
+        return <TaskAndProjectManagement />
+      case "accessControlSystem":
+        return <AccessControlSystem />
+      case "utilityManagement":
+        return <UtilityManagement />
+      case "tenantRequestSystem":
+        return <TenantRequestSystem />
       default:
         return null
     }
@@ -135,6 +150,56 @@ export default function AdminDashboard() {
               <CardContent>
                 <Button className="w-full" onClick={() => setActiveComponent("systemPerformanceMonitoring")}>
                   Просмотр показателей
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Аналитика и отчетность</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("analyticsAndReporting")}>
+                  Просмотр отчетов
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Управление задачами и проектами</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("taskAndProjectManagement")}>
+                  Управление задачами
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Система контроля доступа</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("accessControlSystem")}>
+                  Управление доступом
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Управление коммунальными услугами</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("utilityManagement")}>
+                  Коммунальные услуги
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Система обработки заявок</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" onClick={() => setActiveComponent("tenantRequestSystem")}>
+                  Заявки арендаторов
                 </Button>
               </CardContent>
             </Card>
